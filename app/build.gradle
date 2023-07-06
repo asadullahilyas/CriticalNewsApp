@@ -6,6 +6,12 @@ plugins {
     id("com.google.devtools.ksp").version("1.7.22-1.0.8")
 }
 
+def props = new Properties()
+File propsFile = file("../secrets.properties")
+if (propsFile.isFile()) {
+    propsFile.withInputStream { props.load(it) }
+}
+
 android {
     namespace 'com.asadullah.criticalnewsapp'
     compileSdk 33
@@ -16,6 +22,8 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
+
+        buildConfigField "String", "NEWS_API_SECRET_KEY", "\"${props.getProperty("NEWS_API_SECRET")}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,13 +43,15 @@ android {
         bbc {
             dimension "version"
             applicationIdSuffix ".bbc"
-            buildConfigField "String", "SOURCE", "\"bbc-news\""
+            buildConfigField "String", "SOURCE_ID", "\"bbc-news\""
+            buildConfigField "String", "SOURCE_NAME", "\"BBC NEWS\""
         }
 
         bloom {
             dimension "version"
             applicationIdSuffix ".bloomberg"
-            buildConfigField "String", "SOURCE", "\"bloomberg\""
+            buildConfigField "String", "SOURCE_ID", "\"bloomberg\""
+            buildConfigField "String", "SOURCE_NAME", "\"Bloomberg\""
         }
     }
 
@@ -76,6 +86,7 @@ dependencies {
     // For Android Lifecycle aware flow collection in Compose
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
     implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
 
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -91,7 +102,6 @@ dependencies {
     // Hilt
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation 'org.testng:testng:6.9.6'
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Networking

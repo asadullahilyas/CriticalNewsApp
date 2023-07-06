@@ -1,11 +1,11 @@
-package com.asadullah.criticalnewsapp.api.response
+package com.asadullah.criticalnewsapp.features.home.data.dto
 
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class Articles (
+data class ArticleResponse (
 
-    val source      : Source? = Source(),
+    val source      : SourceResponse? = SourceResponse(),
     val author      : String? = null,
     val title       : String? = null,
     val description : String? = null,

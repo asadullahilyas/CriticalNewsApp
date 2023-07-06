@@ -1,8 +1,8 @@
 package com.asadullah.criticalnewsapp.di
 
 import com.asadullah.criticalnewsapp.BuildConfig
+import com.asadullah.criticalnewsapp.api.ApiImpl
 import com.asadullah.criticalnewsapp.api.ApiInterface
-import com.google.inject.Singleton
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -13,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -63,5 +64,11 @@ object AppModule {
             .client(okHttpClient)
             .build()
             .create(ApiInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideApiImpl(apiInterface: ApiInterface): ApiImpl {
+        return ApiImpl(apiInterface)
     }
 }

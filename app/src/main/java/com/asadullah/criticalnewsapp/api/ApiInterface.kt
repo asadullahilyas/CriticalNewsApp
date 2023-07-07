@@ -7,6 +7,6 @@ import retrofit2.http.*
 
 interface ApiInterface {
 
-    @GET("top-headlines?sources=${BuildConfig.SOURCE_ID}&apiKey=${BuildConfig.NEWS_API_SECRET_KEY}")
+    @GET("top-headlines?sources=${BuildConfig.SOURCE_ID}&apiKey=${BuildConfig.NEWS_API_SECRET_KEY}&pageSize=4")
     suspend fun getTopHeadlines(@Query("page") pageNumber: Int): Response<TopHeadlinesResponse>
 }

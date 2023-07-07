@@ -3,12 +3,16 @@ package com.asadullah.criticalnewsapp.features.home.domain
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asadullah.criticalnewsapp.common.Response
+import com.asadullah.criticalnewsapp.features.home.domain.model.Article
 import com.asadullah.criticalnewsapp.features.home.domain.model.TopHeadlines
 import com.asadullah.criticalnewsapp.features.home.domain.usecase.GetTopHeadlinesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.joda.time.DateTime
+import org.joda.time.Days
+import org.joda.time.Weeks
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,42 +20,67 @@ class HomeScreenViewModel @Inject constructor(
     private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase
 ) : ViewModel() {
 
-    private var currentPage = 0
+    private var currentPage = 1
 
-    private val _topHeadlines: MutableStateFlow<TopHeadlines> = MutableStateFlow(TopHeadlines())
+    private var isLoadingData = false
+
+    private val _topHeadlines: MutableStateFlow<List<Article>> =
+        MutableStateFlow(emptyList())
     val topHeadlines = _topHeadlines.asStateFlow()
 
-    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
+    private val _showMainCircularIndicator: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val showMainCircularIndicator = _showMainCircularIndicator.asStateFlow()
 
     private val _errorResponse: MutableStateFlow<String?> = MutableStateFlow(null)
     val errorResponse = _errorResponse.asStateFlow()
 
     fun onUserEvent(userEvent: UserEvent) {
         when (userEvent) {
-            UserEvent.LoadNextPage -> fetchTopHeadlines(++currentPage)
+            UserEvent.LoadNextPage -> fetchTopHeadlines(currentPage)
         }
     }
 
     private fun fetchTopHeadlines(pageNumber: Int) {
+
+        if (isLoadingData) return
+
+        isLoadingData = true
+
         viewModelScope.launch {
             getTopHeadlinesUseCase(pageNumber).collect { response ->
 
+                isLoadingData = false
+
                 when (response) {
                     is Response.Loading -> {
-                        _isLoading.value = true
+                        _showMainCircularIndicator.value = _topHeadlines.value.isEmpty()
                         _errorResponse.value = null
-                        _topHeadlines.value = TopHeadlines()
                     }
+
                     is Response.Error -> {
-                        _isLoading.value = false
+                        _showMainCircularIndicator.value = false
                         _errorResponse.value = response.message ?: "Unknown error occurred"
-                        _topHeadlines.value = TopHeadlines()
+                        _topHeadlines.value = emptyList()
                     }
+
                     is Response.Success -> {
-                        _isLoading.value = false
+                        currentPage++
+
+                        println("currentPage new value: $currentPage")
+
+                        _showMainCircularIndicator.value = false
                         _errorResponse.value = null
-                        _topHeadlines.value = response.data ?: TopHeadlines()
+
+                        val topHeadlinesMutableList = _topHeadlines.value.toMutableList()
+
+                        topHeadlinesMutableList.addAll(
+                            response
+                                .data
+                                ?.articles
+                                ?.sortedByDescending { it.publishedAt } ?: emptyList()
+                        )
+
+                        _topHeadlines.value = topHeadlinesMutableList
                     }
                 }
             }

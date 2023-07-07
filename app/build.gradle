@@ -47,11 +47,11 @@ android {
             buildConfigField "String", "SOURCE_NAME", "\"BBC NEWS\""
         }
 
-        bloom {
+        cbs {
             dimension "version"
-            applicationIdSuffix ".bloomberg"
-            buildConfigField "String", "SOURCE_ID", "\"bloomberg\""
-            buildConfigField "String", "SOURCE_NAME", "\"Bloomberg\""
+            applicationIdSuffix ".cbs"
+            buildConfigField "String", "SOURCE_ID", "\"cbs-news\""
+            buildConfigField "String", "SOURCE_NAME", "\"CBS NEWS\""
         }
     }
 
@@ -116,8 +116,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
 
-    // Glide
-    implementation 'com.github.bumptech.glide:glide:4.13.2'
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Destinations library
     def destinations_version = "1.5.16-beta"

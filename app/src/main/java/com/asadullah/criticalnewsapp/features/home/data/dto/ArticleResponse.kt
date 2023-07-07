@@ -1,5 +1,6 @@
 package com.asadullah.criticalnewsapp.features.home.data.dto
 
+import com.asadullah.criticalnewsapp.features.home.domain.model.Article
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -15,3 +16,16 @@ data class ArticleResponse (
     val content     : String? = null
 
 )
+
+fun ArticleResponse.toArticle(): Article {
+    return Article(
+        source = source?.toSource(),
+        author = author,
+        title = title,
+        description = description,
+        url = url,
+        urlToImage = urlToImage,
+        publishedAt = publishedAt,
+        content = content
+    )
+}

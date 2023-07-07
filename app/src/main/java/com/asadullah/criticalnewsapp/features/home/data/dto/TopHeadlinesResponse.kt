@@ -14,6 +14,6 @@ data class TopHeadlinesResponse (
 
 fun TopHeadlinesResponse.toTopHeadlines(): TopHeadlines {
     return TopHeadlines(
-        articles = this.articles
+        articles = this.articles.map { it.toArticle() }
     )
 }

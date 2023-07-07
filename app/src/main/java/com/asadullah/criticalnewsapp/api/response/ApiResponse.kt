@@ -5,7 +5,7 @@ import com.squareup.moshi.adapter
 import java.nio.charset.Charset
 
 @OptIn(ExperimentalStdlibApi::class)
-class Response<T : Any>(
+class ApiResponse<T : Any>(
     private val response: retrofit2.Response<T>
 ) {
 

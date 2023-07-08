@@ -1,11 +1,14 @@
 package com.asadullah.criticalnewsapp.features.home.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.Hours
 import org.joda.time.Minutes
 import org.joda.time.Weeks
 
+@Parcelize
 data class Article(
 
     val source: Source? = Source(),
@@ -17,7 +20,7 @@ data class Article(
     val publishedAt: DateTime? = null,
     val content: String? = null
 
-) {
+) : Parcelable {
 
     fun publishedTimeAgo(): String? {
 

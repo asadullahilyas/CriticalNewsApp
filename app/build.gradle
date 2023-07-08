@@ -2,8 +2,9 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
     id 'dagger.hilt.android.plugin'
-    id("com.google.devtools.ksp").version("1.7.22-1.0.8")
+    id 'com.google.devtools.ksp' version "${kotlin_version}-1.0.11"
 }
 
 def props = new Properties()
@@ -44,30 +45,30 @@ android {
             dimension "version"
             applicationIdSuffix ".bbc"
             buildConfigField "String", "SOURCE_ID", "\"bbc-news\""
-            buildConfigField "String", "SOURCE_NAME", "\"BBC NEWS\""
+            buildConfigField "String", "SOURCE_NAME", "\"BBC News\""
         }
 
         cbs {
             dimension "version"
             applicationIdSuffix ".cbs"
             buildConfigField "String", "SOURCE_ID", "\"cbs-news\""
-            buildConfigField "String", "SOURCE_NAME", "\"CBS NEWS\""
+            buildConfigField "String", "SOURCE_NAME", "\"CBS News\""
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
         buildConfig true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.3.2'
+        kotlinCompilerExtensionVersion "$compose_version"
     }
     packagingOptions {
         resources {
@@ -123,9 +124,16 @@ dependencies {
     implementation 'joda-time:joda-time:2.12.5'
 
     // Destinations library
-    def destinations_version = "1.5.16-beta"
+    def destinations_version = "1.8.42-beta"
     implementation "io.github.raamcosta.compose-destinations:core:$destinations_version"
     ksp "io.github.raamcosta.compose-destinations:ksp:$destinations_version"
+
+    // Datastore
+    implementation 'androidx.datastore:datastore-core:1.0.0'
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+
+    // Biometric Manager
+    implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

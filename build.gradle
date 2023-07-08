@@ -3,8 +3,9 @@
 buildscript {
     ext {
         gradle_version = "8.0.2"
+        kotlin_version = "1.8.22"
+        compose_version = "1.4.8"
         hilt_version = "2.46.1"
-        kotlin_version = "1.7.20"
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"

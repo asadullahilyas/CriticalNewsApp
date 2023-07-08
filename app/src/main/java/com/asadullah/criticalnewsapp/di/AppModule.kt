@@ -1,12 +1,15 @@
 package com.asadullah.criticalnewsapp.di
 
+import android.content.Context
 import com.asadullah.criticalnewsapp.BuildConfig
 import com.asadullah.criticalnewsapp.api.ApiImpl
 import com.asadullah.criticalnewsapp.api.ApiInterface
+import com.asadullah.criticalnewsapp.common.Settings
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -70,5 +73,11 @@ object AppModule {
     @Singleton
     fun provideApiImpl(apiInterface: ApiInterface): ApiImpl {
         return ApiImpl(apiInterface)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettings(@ApplicationContext context: Context): Settings {
+        return Settings(context)
     }
 }

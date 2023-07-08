@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.asadullah.criticalnewsapp.features.home.presentation.HomeScreen
+import androidx.fragment.app.FragmentActivity
+import androidx.navigation.compose.rememberNavController
+import com.asadullah.criticalnewsapp.features.NavGraphs
 import com.asadullah.criticalnewsapp.ui.theme.CriticalNewsAppTheme
+import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -22,7 +25,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    val navController = rememberNavController()
+
+                    DestinationsNavHost(
+                        navGraph = NavGraphs.root,
+                        navController = navController
+                    )
                 }
             }
         }

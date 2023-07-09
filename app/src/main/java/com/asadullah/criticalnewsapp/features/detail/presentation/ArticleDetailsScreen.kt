@@ -60,6 +60,7 @@ fun ArticleDetailsScreen(
                     Text(
                         text = article.source?.name ?: "N/A",
                         style = TextStyle(
+                            fontSize = 18.sp,
                             color = colorResource(id = R.color.title_color)
                         )
                     )

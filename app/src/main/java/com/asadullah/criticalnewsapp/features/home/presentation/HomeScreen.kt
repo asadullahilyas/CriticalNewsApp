@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -93,6 +94,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                     Text(
                         text = BuildConfig.SOURCE_NAME,
                         style = TextStyle(
+                            fontSize = 18.sp,
                             color = colorResource(id = R.color.title_color)
                         )
                     )
@@ -106,9 +108,12 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                                 viewModel.onUserEvent(UserEvent.ShowBiometricPrompt)
                             }
                         ) {
+                            val color = Color(0xFF4A8B0E)
                             Icon(
-                                imageVector = Icons.Default.Face,
-                                tint = if (biometricAuthEnabled) Color.Green else Color.DarkGray,
+                                modifier = Modifier
+                                    .size(24.dp),
+                                painter = painterResource(id = R.drawable.fingerprint),
+                                tint = if (biometricAuthEnabled) color else Color.DarkGray,
                                 contentDescription = "Touch ID"
                             )
                         }

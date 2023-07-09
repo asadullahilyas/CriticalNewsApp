@@ -129,79 +129,28 @@ fun MainContent(modifier: Modifier = Modifier, onArticleClicked: (article: Artic
     val showMainCircularIndicator by viewModel.showMainCircularIndicator.collectAsStateWithLifecycle()
     val errorResponse by viewModel.errorResponse.collectAsStateWithLifecycle()
 
-    var showBiometricPrompt by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var title by remember {
-        mutableStateOf("")
-    }
-
-    var description by remember {
-        mutableStateOf("")
-    }
-
-    var actionOnSuccessfulAuthentication by remember<MutableState<UserEvent>> {
-        mutableStateOf(UserEvent.AppAccessGranted)
-    }
-
-    var actionOnAuthenticationFailed by remember<MutableState<UserEvent>> {
-        mutableStateOf(UserEvent.AppAccessDenied)
-    }
+    val biometricPromptState by viewModel.biometricPromptState.collectAsStateWithLifecycle()
 
     var actionOnRetry by remember<MutableState<UserEvent>> {
         mutableStateOf(UserEvent.LoadNextPage)
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.uiEventsFlow.collect { uiEvent ->
-            when (uiEvent) {
-                is UIEvent.ShowBiometricPromptForEnablingBiometricAuth -> {
-                    title = uiEvent.title
-                    description = uiEvent.description
-                    actionOnSuccessfulAuthentication = UserEvent.ToggleBiometricAuth
-                    actionOnAuthenticationFailed = UserEvent.DoNothing
-                    showBiometricPrompt = true
-                }
-
-                is UIEvent.AuthenticateUser -> {
-                    title = uiEvent.title
-                    description = uiEvent.description
-                    actionOnSuccessfulAuthentication = UserEvent.AppAccessGranted
-                    actionOnAuthenticationFailed = UserEvent.AppAccessDenied
-                    showBiometricPrompt = true
-                }
-
-                UIEvent.ApiResponseFailed -> {
-                    actionOnRetry = UserEvent.LoadNextPage
-                }
-
-                UIEvent.BiometricAuthenticationFailed -> {
-                    actionOnRetry = UserEvent.InitiateUserAuthentication
-                }
-            }
-        }
-    }
-
-    if (showBiometricPrompt) {
+    if (biometricPromptState.isShowing) {
         BiometricPrompt(
-            title = title,
-            description = description,
+            title = biometricPromptState.title,
+            description = biometricPromptState.description,
             negativeButton = "Cancel",
             onAuthenticated = {
-                showBiometricPrompt = false
-                viewModel.onUserEvent(actionOnSuccessfulAuthentication)
+                viewModel.onUserEvent(biometricPromptState.onAuthSuccessAction)
             },
             onCancel = {
-                showBiometricPrompt = false
+                viewModel.onUserEvent(biometricPromptState.onAuthCancelAction)
             },
             onAuthenticationError = {
-                showBiometricPrompt = false
-                viewModel.onUserEvent(actionOnAuthenticationFailed)
+                viewModel.onUserEvent(biometricPromptState.onAuthFailAction)
             },
             onAuthenticationSoftError = {
-                showBiometricPrompt = false
-                viewModel.onUserEvent(actionOnAuthenticationFailed)
+                viewModel.onUserEvent(biometricPromptState.onAuthFailAction)
             }
         )
     }
@@ -233,7 +182,7 @@ fun MainContent(modifier: Modifier = Modifier, onArticleClicked: (article: Artic
                     style = TextStyle(color = Color.Red.copy(alpha = 0.9f))
                 )
                 TextButton(onClick = {
-                    viewModel.onUserEvent(actionOnRetry)
+                    viewModel.onUserEvent(viewModel.onRetryAction.value)
                 }) {
                     Text("Retry")
                 }

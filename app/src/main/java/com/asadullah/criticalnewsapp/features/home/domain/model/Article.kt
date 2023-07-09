@@ -1,6 +1,7 @@
 package com.asadullah.criticalnewsapp.features.home.domain.model
 
 import android.os.Parcelable
+import com.asadullah.criticalnewsapp.common.format
 import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
 import org.joda.time.Days
@@ -29,10 +30,10 @@ data class Article(
         val now = DateTime.now()
         val daysBetween = Days.daysBetween(publishedAt, now).days
         return if (daysBetween > 30) {
-            publishedAt.toString("MMM dd, YYYY")
-        } else if (daysBetween > 7) {
+            publishedAt.format("MMM dd, YYYY")
+        } else if (daysBetween > 6) {
             val weeksBetween = Weeks.weeksBetween(publishedAt, now).weeks
-            "$weeksBetween week ${if (weeksBetween > 1) "s" else ""} ago"
+            "$weeksBetween week${if (weeksBetween > 1) "s" else ""} ago"
         } else if (daysBetween > 1) {
             "$daysBetween days ago"
         } else if (daysBetween == 1) {

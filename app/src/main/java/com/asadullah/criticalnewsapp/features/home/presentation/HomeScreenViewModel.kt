@@ -8,11 +8,10 @@ import com.asadullah.criticalnewsapp.common.mutableStateIn
 import com.asadullah.criticalnewsapp.features.home.domain.model.Article
 import com.asadullah.criticalnewsapp.features.home.domain.usecase.GetTopHeadlinesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,8 +25,13 @@ class HomeScreenViewModel @Inject constructor(
 
     private var isLoadingData = false
 
-    private val _uiEventsFlow: MutableSharedFlow<UIEvent> = MutableSharedFlow()
-    val uiEventsFlow = _uiEventsFlow.asSharedFlow()
+    private val _biometricPromptState: MutableStateFlow<BiometricUIData> = MutableStateFlow(
+        BiometricUIData()
+    )
+    val biometricPromptState = _biometricPromptState.asStateFlow()
+
+    private val _onRetryAction: MutableStateFlow<UserEvent> = MutableStateFlow(UserEvent.DoNothing)
+    val onRetryAction = _onRetryAction.asStateFlow()
 
     private val _isUserAuthenticated: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isUserAuthenticated = _isUserAuthenticated.asStateFlow()
@@ -63,12 +67,16 @@ class HomeScreenViewModel @Inject constructor(
 
             val isBiometricAuthenticationEnabled = settings.getBiometricAuthEnabled().first()
             if (isBiometricAuthenticationEnabled) {
-                _uiEventsFlow.emit(
-                    UIEvent.AuthenticateUser(
+                _biometricPromptState.update {
+                    it.copy(
+                        isShowing = true,
                         title = "Authorization",
-                        description = "Please authorize yourself in order to access the app."
+                        description = "Please authorize yourself in order to access the app.",
+                        onAuthSuccessAction = UserEvent.AppAccessGranted,
+                        onAuthFailAction = UserEvent.AppAccessDenied,
+                        onAuthCancelAction = UserEvent.AppAccessDenied
                     )
-                )
+                }
             } else {
                 appAccessGranted()
             }
@@ -96,7 +104,7 @@ class HomeScreenViewModel @Inject constructor(
                         _showMainCircularIndicator.value = false
                         _errorResponse.value = response.message ?: "Unknown error occurred"
                         _topHeadlines.value = emptyList()
-                        _uiEventsFlow.emit(UIEvent.ApiResponseFailed)
+                        _onRetryAction.value = UserEvent.LoadNextPage
                     }
 
                     is Response.Success -> {
@@ -125,12 +133,14 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun showBiometricPrompt() {
         viewModelScope.launch {
-            _uiEventsFlow.emit(
-                UIEvent.ShowBiometricPromptForEnablingBiometricAuth(
+            _biometricPromptState.update {
+                it.copy(
+                    isShowing = true,
                     title = "Authorization",
-                    description = "Please authorize if you want to ${if (biometricAuthEnabled.value) "disable" else "enable"} Biometric Authentication."
+                    description = "Please authorize if you want to ${if (biometricAuthEnabled.value) "disable" else "enable"} Biometric Authentication.",
+                    onAuthSuccessAction = UserEvent.ToggleBiometricAuth
                 )
-            )
+            }
         }
     }
 
@@ -143,12 +153,14 @@ class HomeScreenViewModel @Inject constructor(
     private fun appAccessGranted() {
         _errorResponse.value = null
         _isUserAuthenticated.value = true
+        _biometricPromptState.value = BiometricUIData()
     }
 
     private fun appAccessDenied() {
         _errorResponse.value = "You are not authorized to access this app."
+        _biometricPromptState.value = BiometricUIData()
         viewModelScope.launch {
-            _uiEventsFlow.emit(UIEvent.BiometricAuthenticationFailed)
+            _onRetryAction.value = UserEvent.InitiateUserAuthentication
         }
     }
 }
@@ -163,9 +175,11 @@ sealed interface UserEvent {
     object DoNothing : UserEvent
 }
 
-sealed interface UIEvent {
-    data class ShowBiometricPromptForEnablingBiometricAuth(val title: String, val description: String) : UIEvent
-    data class AuthenticateUser(val title: String, val description: String) : UIEvent
-    object ApiResponseFailed: UIEvent
-    object BiometricAuthenticationFailed : UIEvent
-}
+data class BiometricUIData(
+    val isShowing: Boolean = false,
+    val title: String = "",
+    val description: String = "",
+    val onAuthSuccessAction: UserEvent = UserEvent.DoNothing,
+    val onAuthFailAction: UserEvent = UserEvent.DoNothing,
+    val onAuthCancelAction: UserEvent = UserEvent.DoNothing
+)

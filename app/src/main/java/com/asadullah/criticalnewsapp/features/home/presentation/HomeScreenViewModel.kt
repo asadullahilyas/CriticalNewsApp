@@ -30,9 +30,6 @@ class HomeScreenViewModel @Inject constructor(
     )
     val biometricPromptState = _biometricPromptState.asStateFlow()
 
-    private val _onRetryAction: MutableStateFlow<UserEvent> = MutableStateFlow(UserEvent.DoNothing)
-    val onRetryAction = _onRetryAction.asStateFlow()
-
     private val _isUserAuthenticated: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isUserAuthenticated = _isUserAuthenticated.asStateFlow()
 
@@ -47,12 +44,12 @@ class HomeScreenViewModel @Inject constructor(
     private val _showMainCircularIndicator: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val showMainCircularIndicator = _showMainCircularIndicator.asStateFlow()
 
-    private val _errorResponse: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val _errorResponse: MutableStateFlow<ErrorUIData?> = MutableStateFlow(null)
     val errorResponse = _errorResponse.asStateFlow()
 
     fun onUserEvent(userEvent: UserEvent) {
         when (userEvent) {
-            UserEvent.DoNothing -> {}
+            UserEvent.DoNothing -> dismissBiometricPrompt()
             UserEvent.InitiateUserAuthentication -> initiateUserAuthentication()
             UserEvent.LoadNextPage -> fetchTopHeadlines(currentPage)
             UserEvent.ShowBiometricPrompt -> showBiometricPrompt()
@@ -102,9 +99,11 @@ class HomeScreenViewModel @Inject constructor(
 
                     is Response.Error -> {
                         _showMainCircularIndicator.value = false
-                        _errorResponse.value = response.message ?: "Unknown error occurred"
                         _topHeadlines.value = emptyList()
-                        _onRetryAction.value = UserEvent.LoadNextPage
+                        _errorResponse.value = ErrorUIData(
+                            errorMessage = response.message ?: "Unknown error occurred",
+                            onRetry = UserEvent.LoadNextPage
+                        )
                     }
 
                     is Response.Success -> {
@@ -145,6 +144,8 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun toggleBiometricAuth() {
+        _errorResponse.value = null
+        _biometricPromptState.value = BiometricUIData()
         viewModelScope.launch {
             settings.setBiometricAuthEnabled(enabled = biometricAuthEnabled.value.not())
         }
@@ -153,15 +154,19 @@ class HomeScreenViewModel @Inject constructor(
     private fun appAccessGranted() {
         _errorResponse.value = null
         _isUserAuthenticated.value = true
-        _biometricPromptState.value = BiometricUIData()
+        dismissBiometricPrompt()
     }
 
     private fun appAccessDenied() {
-        _errorResponse.value = "You are not authorized to access this app."
+        _errorResponse.value = ErrorUIData(
+            errorMessage = "You are not authorized to access this app.",
+            onRetry = UserEvent.InitiateUserAuthentication
+        )
+        dismissBiometricPrompt()
+    }
+
+    private fun dismissBiometricPrompt() {
         _biometricPromptState.value = BiometricUIData()
-        viewModelScope.launch {
-            _onRetryAction.value = UserEvent.InitiateUserAuthentication
-        }
     }
 }
 
@@ -182,4 +187,9 @@ data class BiometricUIData(
     val onAuthSuccessAction: UserEvent = UserEvent.DoNothing,
     val onAuthFailAction: UserEvent = UserEvent.DoNothing,
     val onAuthCancelAction: UserEvent = UserEvent.DoNothing
+)
+
+data class ErrorUIData(
+    val errorMessage: String = "",
+    val onRetry: UserEvent = UserEvent.DoNothing
 )

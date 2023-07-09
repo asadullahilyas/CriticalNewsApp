@@ -165,7 +165,7 @@ fun MainContent(modifier: Modifier = Modifier, onArticleClicked: (article: Artic
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
-        } else if (errorResponse.isNeitherNullNorEmptyNorBlank()) {
+        } else if (errorResponse != null) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,12 +177,12 @@ fun MainContent(modifier: Modifier = Modifier, onArticleClicked: (article: Artic
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    text = errorResponse!!,
+                    text = errorResponse!!.errorMessage,
                     textAlign = TextAlign.Center,
                     style = TextStyle(color = Color.Red.copy(alpha = 0.9f))
                 )
                 TextButton(onClick = {
-                    viewModel.onUserEvent(viewModel.onRetryAction.value)
+                    viewModel.onUserEvent(errorResponse!!.onRetry)
                 }) {
                     Text("Retry")
                 }

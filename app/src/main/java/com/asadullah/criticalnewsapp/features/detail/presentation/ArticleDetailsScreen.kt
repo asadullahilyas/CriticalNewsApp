@@ -2,6 +2,7 @@
 
 package com.asadullah.criticalnewsapp.features.detail.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +20,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -49,14 +52,24 @@ fun ArticleDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults
+                    .smallTopAppBarColors(
+                        containerColor = Color.White
+                    ),
                 title = {
-                    Text(text = article.source?.name ?: "N/A")
+                    Text(
+                        text = article.source?.name ?: "N/A",
+                        style = TextStyle(
+                            color = colorResource(id = R.color.title_color)
+                        )
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = colorResource(id = R.color.title_color)
                         )
                     }
                 },
@@ -68,11 +81,14 @@ fun ArticleDetailsScreen(
 
         Column(
             modifier = Modifier
+                .background(Color(0xFFF1F1F1))
                 .fillMaxSize()
                 .verticalScroll(state = scrollState)
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp)
         ) {
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             AsyncImage(
                 modifier = Modifier
@@ -135,6 +151,8 @@ fun ArticleDetailsScreen(
                     fontSize = 14.sp
                 )
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

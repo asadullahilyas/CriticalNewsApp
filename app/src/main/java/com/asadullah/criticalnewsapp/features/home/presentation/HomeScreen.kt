@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -83,8 +85,17 @@ fun HomeScreen(navigator: DestinationsNavigator) {
             val biometricAuthEnabled by viewModel.biometricAuthEnabled.collectAsStateWithLifecycle()
 
             TopAppBar(
+                colors = TopAppBarDefaults
+                    .smallTopAppBarColors(
+                        containerColor = Color.White
+                    ),
                 title = {
-                    Text(text = BuildConfig.SOURCE_NAME)
+                    Text(
+                        text = BuildConfig.SOURCE_NAME,
+                        style = TextStyle(
+                            color = colorResource(id = R.color.title_color)
+                        )
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 actions = {
@@ -320,7 +331,11 @@ private fun ArticleView(
                 .padding(end = 12.dp)
                 .align(Alignment.End),
             onClick = { onArticleClicked(article) }) {
-            Text(text = "See full story")
+            Text(
+                text = "See full story", style = TextStyle(
+                    color = colorResource(id = R.color.title_color)
+                )
+            )
         }
     }
 }
